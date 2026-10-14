@@ -1,0 +1,10 @@
+{
+  "name": "hisui-sweet-mystery",
+  "version": "0.1.0",
+  "private": true,
+  "description": "翡翠荘の甘き密室 — 設定と素材を引き継ぐローカル下書き",
+  "scripts": {
+    "start": "node preview.cjs",
+    "test": "node test.cjs"
+  }
+}
