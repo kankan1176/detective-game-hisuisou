@@ -13,7 +13,7 @@ profiles=function(){
 const panel=$('#reference-panel')||$('#panel');
 if(profilePerson===null){
   panel.dataset.folioStart=String(profileListPage);
-  panel.innerHTML=`<h3>人物資料</h3><p>アイコンを選ぶと詳しい人物資料を読めます。</p><div class="character-directory">${Array.from({length:8},(_,row)=>`<div class="character-icon-row">${HISUI.people.slice(row*2,row*2+2).map(p=>`<button class="character-icon" data-profile="${p.id}" aria-label="${p.name}の人物資料">${portrait(p.id,0,'directory-portrait')}<strong>${p.name}</strong></button>`).join('')}</div>`).join('')}</div><h3>館で働く人たち</h3><p>管理人、庭師、パティシエ。勤務や納品の記録で動きを確かめられます。</p>`;
+  panel.innerHTML=`<h3>人物資料</h3><p>アイコンを選ぶと詳しい人物資料を読めます。</p><div class="character-directory">${Array.from({length:8},(_,row)=>`<div class="character-icon-row">${HISUI.people.slice(row*2,row*2+2).map(p=>`<button class="character-icon" data-profile="${p.id}" aria-label="${p.name}の人物資料">${portrait(p.id,0,'directory-portrait')}<strong>${p.name}</strong></button>`).join('')}</div>`).join('')}</div><h3>館で働く人たち</h3><p>管理人、庭師、パティシエ。シフトや納品メモを見れば、当時の動きを確かめられます。</p>`;
   panel.querySelectorAll('[data-profile]').forEach(button=>button.onclick=()=>{profileListPage=Number(panel.dataset.folioPage||0);profilePerson=Number(button.dataset.profile);profiles();});
   return;
 }

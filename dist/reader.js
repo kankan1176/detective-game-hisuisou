@@ -22,12 +22,12 @@
     controls.className = 'folio-controls';
     controls.setAttribute('aria-label', 'ページ切り替え');
     const previous = document.createElement('button');
-    previous.textContent = '前へ';
+    previous.textContent = root.matches('#opening-text, .dialogue-box>p')?'前のページ':'前へ';
     previous.setAttribute('aria-label', '前のページ');
     const counter = document.createElement('span');
     counter.setAttribute('aria-live', 'polite');
     const next = document.createElement('button');
-    next.textContent = '次へ';
+    next.textContent = root.matches('#opening-text, .dialogue-box>p')?'次のページ':'次へ';
     next.setAttribute('aria-label', '次のページ');
     controls.append(previous, counter, next);
     root.classList.add('folio');
@@ -60,6 +60,13 @@
     if (r.counter.textContent !== text) r.counter.textContent = text;
     r.previous.disabled = r.page === 0;
     r.next.disabled = r.page >= r.count - 1;
+    r.controls = r.root.querySelector(':scope>.folio-controls');
+    if(r.controls && r.root.matches('#opening-text, .dialogue-box>p'))r.controls.hidden=r.count===1;
+    if(r.root.matches('#opening-text, .dialogue-box>p')){
+      const scope=r.root.closest('.cinema-dialogue, .dialogue-box');
+      const advance=scope?.querySelector('#intro-next, #line-next, #dialogue-done');
+      if(advance){advance.disabled=r.page<r.count-1;advance.title=advance.disabled?'文章の「次のページ」で続きを読んでください。':'';}
+    }
   }
   function layout() {
     mutation.disconnect();
@@ -74,7 +81,7 @@
         panel.before(scene);
       }
     });
-    const roots = document.querySelectorAll('#panel, #reference-panel, #modal[open] #modal-body, .dialogue-box>p, #app>.reading');
+    const roots = document.querySelectorAll('#panel, #reference-panel, #modal[open] #modal-body, .dialogue-box>p, #opening-text, #app>.reading');
     for (const [root] of readers) if (!root.isConnected) readers.delete(root);
     for (const root of roots) {
       const r = attach(root);

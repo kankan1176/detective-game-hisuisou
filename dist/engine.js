@@ -23,7 +23,7 @@ if(proof)lines.push({speaker:x.name,text:`「${D.E[proof][0]}」を一緒に見�
 lines.push({speaker:y.name,text:y.voice});let gained=[],keys=[],outcome;
 if(fail){s.trust[b]=Math.max(0,s.trust[b]-1);const rr=rumorDefs[topic];if(!s.rumors.some(r=>r.id===topic))s.rumors.push({id:topic,text:rr[0],by:rr[1],correction:rr[2],corrected:has(s,rr[1]),turn:s.turn+1});lines.push({speaker:y.name,text:!relevant?'その資料を私への疑いに結びつけられても、話が噛み合いません。まず、今の話題に関係することからお願いします。':'その言い方だと、何を答えても疑われる気がする。……もう、さっき広間で出ていた話でいいんじゃないですか。'},{speaker:'地の文',text:`すれ違いの中で「${rr[0]}」という噂が会話に混ざった。裏付けはない。手帳には未確認として記録した。`});outcome='すれ違い / 未確認の噂';
 }else{const old=s.trust[b];s.trust[b]=Math.min(4,s.trust[b]+(rel==='good'||safe?2:1));if(lead){s.seen.push(lead.id);lines.push({speaker:y.name,text:lead.text});for(const e of lead.give)if(!has(s,e)){s.evidence.push(e);gained.push(e);}outcome=gained.length||keys.length?'新しい手がかり':'仮説を整理';}else{lines.push({speaker:y.name,text:D.personal[b][D.topics.findIndex(t=>t[0]===topic)]},{speaker:'地の文',text:'今の観察を手帳に残し、別の証言や記録と照合しよう。'});outcome=old===0?'対話を立て直した':'観察を確認';}
-if(rel==='good')lines.push({speaker:y.name,text:`${x.name}になら、うまく言えないところも整理してもらえそう。${y.weak}だから、今の話のどこが観察で、どこが解釈かも一緒に確認したい。`});
+if(rel==='good')lines.push({speaker:y.name,text:`${x.name}になら、うまく言えないところも整理してもらえそう。自分では気づかない思い込みもあるから、今の話のどこが観察で、どこが解釈かも一緒に確認したい。`});
 else if(rel==='bad')lines.push({speaker:'地の文',text:'普段はすれ違う二人も、尋ね方と根拠を揃えることで同じ記録を見られた。相性だけで、情報の真偽は決まらない。'});
 else lines.push({speaker:x.name,text:`分かった。${gained.length?'今の観察を記録しよう。別の人の記憶とも照合したい。':'まだ足りない部分は、別の証言とつなげよう。'}思い込みで穴を埋めないようにしよう。`});}
 repair(s);s.turn++;const entry={turn:s.turn,a,b,topic,approach,proof,rel,outcome,lines,gained,keys};s.history.push(entry);s.actions.push({kind:'talk',a,b,topic,approach,proof});return entry;
