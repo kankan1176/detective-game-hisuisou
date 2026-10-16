@@ -6,7 +6,7 @@ OUT=Path('/tmp/hisui-alignment')
 with sync_playwright() as p:
  b=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox'])
  results=[]
- for w,h in [(1366,768),(390,844),(844,390),(360,640),(320,568),(768,1024)]:
+ for w,h in [(1366,768),(1920,911),(2560,1080),(3440,1440),(390,844),(844,390),(360,640),(320,568),(768,1024)]:
   page=b.new_page(viewport={'width':w,'height':h},reduced_motion='reduce');page.goto('http://127.0.0.1:4175');page.locator('[data-action="new"]').click();page.wait_for_timeout(300)
   cases=page.evaluate('''()=>{let results=[];for(const p of HisuiStory.people){for(let face=0;face<(p.row===null?6:3);face++){document.querySelector('.cast-stage').innerHTML=portrait(p.id,face);fitCast();const e=document.querySelector('.cast-stage .portrait'),r=e.getBoundingClientRect(),d=document.querySelector('.dialogue').getBoundingClientRect(),t=document.querySelector('.theater').getBoundingClientRect(),tail=Number(getComputedStyle(e).getPropertyValue('--sprite-tail')),bottom=r.bottom-tail*r.height;results.push({name:p.name,face,gap:d.top-bottom,top:r.top,stageTop:t.top,filter:getComputedStyle(e).filter});}}return results;}''')
   assert len(cases)==120

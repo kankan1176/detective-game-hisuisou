@@ -65,11 +65,11 @@ with sync_playwright() as p:
  page=b.new_page(viewport={'width':1366,'height':768});page.clock.install();page.goto(BASE)
  page.clock.fast_forward(6600);page.clock.run_for(50)
  assert page.locator('.title-cast-group.visible').get_attribute('data-group')=='1'
- page.set_viewport_size({'width':390,'height':844});page.clock.run_for(100)
+ page.set_viewport_size({'width':390,'height':844});page.wait_for_function('document.querySelectorAll(".ensemble-person").length===23');page.clock.run_for(100)
  assert page.locator('.ensemble-person').count()==23 and page.evaluate('titleTimer===null')
  page.set_viewport_size({'width':844,'height':390});page.clock.run_for(100)
  assert page.locator('.ensemble-person').count()==23 and page.evaluate('titleTimer===null')
- page.set_viewport_size({'width':1366,'height':768});page.clock.run_for(100)
+ page.set_viewport_size({'width':1366,'height':768});page.wait_for_function('document.querySelectorAll(".title-cast-group.visible .portrait").length===4&&titleTimer!==null');page.clock.run_for(100)
  assert page.locator('.title-cast-group.visible .portrait').count()==4 and page.evaluate('titleTimer!==null')
  page.close()
  page=b.new_page(reduced_motion='reduce');page.goto(BASE);assert page.evaluate('titleTimer===null')
