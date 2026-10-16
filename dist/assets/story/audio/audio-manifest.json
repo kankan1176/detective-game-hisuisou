@@ -1,0 +1,81 @@
+{
+  "sample_rate": 48000,
+  "channels": 1,
+  "format": "PCM16 WAV",
+  "license": "Original procedural audio created for this project; no third-party samples.",
+  "note": "合成効果音。自然音の収録ではない。tea-pourは仮の注水テクスチャ。実機で音量バランス確認が必要。",
+  "effects": [
+    {
+      "id": "footsteps-wood",
+      "duration": 2.4,
+      "peak": 0.4426,
+      "original_procedural": true
+    },
+    {
+      "id": "footsteps-receding",
+      "duration": 3.2,
+      "peak": 0.4963,
+      "original_procedural": true
+    },
+    {
+      "id": "tray-setdown",
+      "duration": 1.4,
+      "peak": 0.6432,
+      "original_procedural": true
+    },
+    {
+      "id": "metal-contact-distant",
+      "duration": 1.6,
+      "peak": 0.2034,
+      "original_procedural": true
+    },
+    {
+      "id": "door-close-distant",
+      "duration": 1.3,
+      "peak": 0.3372,
+      "original_procedural": true
+    },
+    {
+      "id": "wrapper-open",
+      "duration": 1.6,
+      "peak": 0.2724,
+      "original_procedural": true
+    },
+    {
+      "id": "chips-crunch",
+      "duration": 0.9,
+      "peak": 0.4725,
+      "original_procedural": true
+    },
+    {
+      "id": "announcement-chime",
+      "duration": 2.8,
+      "peak": 0.3824,
+      "original_procedural": true
+    },
+    {
+      "id": "cutlery-return",
+      "duration": 1.3,
+      "peak": 0.3159,
+      "original_procedural": true
+    },
+    {
+      "id": "storage-door",
+      "duration": 1.5,
+      "peak": 0.4209,
+      "original_procedural": true
+    },
+    {
+      "id": "board-place",
+      "duration": 0.5,
+      "peak": 0.2478,
+      "original_procedural": true
+    },
+    {
+      "id": "tea-pour",
+      "duration": 1.8,
+      "peak": 0.0789,
+      "original_procedural": true
+    }
+  ]
+}
