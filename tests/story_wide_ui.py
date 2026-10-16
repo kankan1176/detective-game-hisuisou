@@ -7,8 +7,13 @@ with sync_playwright() as p:
  for w,h in [(1366,768),(1600,900),(1920,911),(1920,1080),(2560,1080),(3440,1440),(390,844),(844,390)]:
   page=b.new_page(viewport={'width':w,'height':h},reduced_motion='reduce');errors=[]
   page.on('pageerror',lambda e:errors.append(str(e)));page.on('dialog',lambda d:d.dismiss())
-  page.goto('http://127.0.0.1:4175',wait_until='networkidle');page.locator('[data-action="new"]').click();page.wait_for_timeout(40)
+  page.goto('http://127.0.0.1:4175',wait_until='networkidle')
+  assert page.locator('[data-action="new"]').evaluate('e=>getComputedStyle(e).cursor')=='pointer'
+  assert page.locator('[data-action="continue"]').evaluate('e=>e.disabled&&getComputedStyle(e).cursor==="not-allowed"')
+  page.locator('[data-action="new"]').click();page.wait_for_timeout(40)
+  assert page.locator('[data-action="dialogue-prev"]').evaluate('e=>e.disabled&&getComputedStyle(e).cursor==="not-allowed"')
   def fit(label):
+   page.evaluate('()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth&&document.documentElement.scrollHeight<=innerHeight'),(w,h,label,'page overflow')
    assert page.evaluate('''()=>{const a=document.querySelector('#app').getBoundingClientRect(),t=document.querySelector('.theater').getBoundingClientRect(),s=document.querySelector('.workspace').getBoundingClientRect();return Math.abs(s.right-a.right)<1&&Math.abs(s.bottom-a.bottom)<1&&(t.right<=s.left+1||t.bottom<=s.top+1);}'''),(w,h,label,'unfilled grid')
    if page.locator('#work-panel').count():assert page.locator('#work-panel').evaluate('e=>e.clientHeight>=70'),(w,h,label,'collapsed panel')
@@ -16,6 +21,10 @@ with sync_playwright() as p:
     assert page.locator('.speech').evaluate('e=>e.scrollWidth<=e.clientWidth+1'),(w,h,label,'speech overflow')
     assert page.evaluate('''()=>{const t=document.querySelector('.theater').getBoundingClientRect();return [...document.querySelectorAll('.dialogue-controls button')].every(e=>{const r=e.getBoundingClientRect();return r.left>=t.left&&r.right<=t.right&&r.top>=t.top&&r.bottom<=t.bottom});}'''),(w,h,label,'off-screen dialogue controls')
    assert page.evaluate('''()=>{const t=document.querySelector('.theater').getBoundingClientRect();return [...document.querySelectorAll('.cast-stage .portrait')].every(e=>{const r=e.getBoundingClientRect();return r.left>=t.left-1&&r.right<=t.right+1;});}'''),(w,h,label,'cropped sprite edge')
+   if page.locator('.cast-stage').count():
+    assert page.evaluate('''()=>{const header=document.querySelector('.scene-meta').getBoundingClientRect(),text=[...document.querySelectorAll('.speaker,.speech,.scene-note .eyebrow,.scene-note h2,.scene-note p')].filter(e=>e.getClientRects().length).map(e=>e.getBoundingClientRect());return [...document.querySelectorAll('.cast-stage .portrait')].every(e=>{const r=e.getBoundingClientRect(),bottom=r.bottom-Number(getComputedStyle(e).getPropertyValue('--sprite-tail'))*r.height;return r.top>=header.bottom&&text.every(t=>bottom<=t.top||r.right<=t.left||r.left>=t.right);});}'''),(w,h,label,'character overlaps text')
+   if page.locator('.speaker').count():
+    assert page.locator('.speaker').evaluate('e=>{const r=e.getBoundingClientRect(),d=e.closest(".dialogue").getBoundingClientRect();return r.top>=d.top&&r.bottom<=d.bottom}')
    assert not errors,errors
   fit('conversation')
   size=page.locator('.cast-stage .portrait').first.bounding_box()['width']
@@ -29,9 +38,27 @@ with sync_playwright() as p:
   while page.evaluate('!!HisuiUI.dialogue'):page.locator('[data-action="dialogue-next"]').first.click()
   for tab in ['talk','records','people','board']:
    page.locator(f'[data-tab="{tab}"]').click();fit(tab)
+   if tab=='talk':
+    assert page.locator('button[data-actor]').first.evaluate('e=>getComputedStyle(e).cursor')=='pointer'
+    assert page.locator('button[data-target] .portrait').first.evaluate('e=>getComputedStyle(e).cursor')=='pointer'
+   if tab=='people':
+    assert page.locator('button[data-person]').first.evaluate('e=>getComputedStyle(e).cursor')=='zoom-in'
+    assert page.locator('.person-card .name').evaluate_all('es=>es.every(e=>{const p=e.previousElementSibling,r=p.getBoundingClientRect();return r.bottom-Number(getComputedStyle(p).getPropertyValue("--sprite-tail"))*r.height<=e.getBoundingClientRect().top+1})')
   # Legitimate engine operations create a populated board and saved checkpoint.
   page.evaluate('''()=>{F.ask(state,5,6,'invite');F.share(state,5,'invite');F.gather(state);F.checkpoint(state);F.next(state);F.checkpoint(state);F.next(state);state.phase='free';let pending=new Set(F.stage(state).required);for(let guard=0;pending.size&&guard<20;guard++){for(const id of [...pending]){const r=D.records[id];for(const [i,scene] of F.stage(state).scenes.entries()){if(!scene.cast.includes(r.owner))continue;state.scene=i;const a=F.audience(state).find(p=>p<16&&p!==r.owner&&r.req.every(q=>F.knows(state,p,q)));if(a===undefined)continue;F.ask(state,a,r.owner,id);pending.delete(id);break;}}}if(pending.size)throw Error('Unreachable records');F.gather(state);F.beginBoard(state);tab='board';render();}''')
   fit('populated board');page.screenshot(path=str(OUT/f'{w}x{h}-board.png'))
+  assert page.locator('.board-task label').first.evaluate('e=>getComputedStyle(e).cursor')=='pointer'
+  assert page.locator('.board-task select').first.evaluate('e=>getComputedStyle(e).cursor')=='pointer'
+  assert page.locator('.time-editor summary').evaluate('e=>getComputedStyle(e).cursor')=='pointer'
+  page.locator('.board-task input').first.check();assert page.locator('.board-task input').first.is_checked()
+  page.locator('[data-tab="records"]').click()
+  record=page.locator('.record-card').first
+  assert record.evaluate('e=>getComputedStyle(e).cursor')=='zoom-in'
+  before=record.evaluate('e=>getComputedStyle(e).backgroundColor');record.hover()
+  page.wait_for_timeout(180)
+  assert record.evaluate('e=>getComputedStyle(e).backgroundColor')!=before
+  record.locator('h3').click();assert page.locator('#modal').evaluate('e=>e.open')
+  page.locator('#close-modal').click();page.locator('[data-tab="board"]').click()
   page.evaluate('''()=>{for(const t of F.stage(state).board)F.check(state,t.id,t.proof,t.answer);F.complete(state,F.audience(state).find(p=>p<16));F.checkpoint(state);state.savedOK=saveCheckpoint();render();}''')
   fit('checkpoint');page.screenshot(path=str(OUT/f'{w}x{h}-checkpoint.png'))
   page.locator('#help').click();assert page.locator('#modal').evaluate('e=>{const r=e.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight}')

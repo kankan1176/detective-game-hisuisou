@@ -26,16 +26,16 @@ function render(){
  if(state.phase==='ending'){renderEnding();return;}
  selectValid();const st=D.stages[state.stage],c=cast();
  const faces=dialogue?dialogueFaces():[actor,target].filter(Number.isInteger);
- app.innerHTML=`<div class="game"><section class="theater" aria-label="会話の場面"><div class="scene-bg" style="${sheetStyle(background())}"></div><span class="location">${escape(dialogue?.bg?sceneName(dialogue.bg):(state.phase==='free'?currentScene().name:state.phase==='intro'?currentScene().name:'会場・関係者の合流'))}</span><span class="scene-clock">${st.tag}</span><div class="cast-stage">${faces.map(id=>portrait(id,dialogue?.lines[dialogue.index]?.who===id?(dialogue.lines[dialogue.index].face||0):0,dialogue&&dialogue.lines[dialogue.index]?.who!==id?'dim':'')).join('')}</div>${dialogue?dialogueMarkup():`<div class="scene-note"><div class="eyebrow">${st.tag}</div><h2>${escape(st.title)}</h2><p>会話を選び、記録を比べ、あなた自身の推理を。</p></div>`}</section><section class="workspace" aria-label="調査と記録"><div class="mission"><div class="eyebrow">${state.phase==='checkpoint'?'CHAPTER COMPLETE':'現在の目的'}</div><p>${escape(state.phase==='checkpoint'?(state.savedOK?'区切りの記録を保存しました。':'記録を保存できませんでした。'):st.goal)}</p><small>${phaseText()}</small></div>${renderWorkspace()}</section></div>`;
+ app.innerHTML=`<div class="game"><section class="theater" aria-label="会話の場面"><div class="scene-bg" style="${sheetStyle(background())}"></div><div class="scene-meta"><span class="location">${escape(dialogue?.bg?sceneName(dialogue.bg):(state.phase==='free'?currentScene().name:state.phase==='intro'?currentScene().name:'会場・関係者の合流'))}</span><span class="scene-clock">${st.tag}</span></div><div class="cast-stage">${faces.map(id=>portrait(id,dialogue?.lines[dialogue.index]?.who===id?(dialogue.lines[dialogue.index].face||0):0,dialogue&&dialogue.lines[dialogue.index]?.who!==id?'dim':'')).join('')}</div>${dialogue?dialogueMarkup():`<div class="scene-note"><div class="eyebrow">${st.tag}</div><h2>${escape(st.title)}</h2><p>会話を選び、記録を比べ、あなた自身の推理を。</p></div>`}</section><section class="workspace" aria-label="調査と記録"><div class="mission"><div class="eyebrow">${state.phase==='checkpoint'?'CHAPTER COMPLETE':'現在の目的'}</div><p>${escape(state.phase==='checkpoint'?(state.savedOK?'区切りの記録を保存しました。':'記録を保存できませんでした。'):st.goal)}</p><small>${phaseText()}</small></div>${renderWorkspace()}</section></div>`;
  requestAnimationFrame(fitCast);
  if(!dialogue&&state.phase==='free'&&tab==='talk')requestAnimationFrame(()=>{const el=$('.panel');if(el&&state.stage===0)el.scrollTop=0;});
 }
-// Anchor painted sprite bottoms to the actual dialogue edge, not viewport percentages.
+// Reserve measured text bands; painted sprite bottoms meet the opaque lower band.
 function fitCast(){
  const theater=$('.theater'),stage=$('.cast-stage');if(!theater||!stage)return;
- const rect=theater.getBoundingClientRect(),box=$('.dialogue')?.getBoundingClientRect();
- const anchor=box?box.top-rect.top+14:rect.height+10;
- const topReserve=box?32:12;
+ const rect=theater.getBoundingClientRect(),box=$('.dialogue, .scene-note')?.getBoundingClientRect();
+ const anchor=box?box.top-rect.top+8:rect.height+10;
+ const topReserve=($('.scene-meta')?.getBoundingClientRect().bottom??rect.top)+8-rect.top;
  stage.style.top='0px';stage.style.bottom=(rect.height-anchor)+'px';
  for(const sprite of stage.querySelectorAll('.portrait')){
   sprite.style.maxWidth=Math.max(50,anchor-topReserve)+'px';
