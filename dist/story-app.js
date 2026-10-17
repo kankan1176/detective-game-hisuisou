@@ -81,7 +81,10 @@ function fitCast(){
 // Title slots fit complete silhouettes, keeping hands and hats inside the screen.
 function fitTitleCast(){
  const cover=$('.title-cover:not(.title-mobile) .cover-art');if(!cover)return;
- const available=Math.max(1,cover.clientHeight-52-60);
+ const menu=$('.title-cover .cover-buttons'),logo=$('.title-logo'),coverRect=cover.getBoundingClientRect();
+ if(menu&&logo){const gap=Math.max(12,Math.min(20,cover.clientHeight*.025));menu.style.top=(logo.getBoundingClientRect().bottom-coverRect.top+gap)+'px';menu.style.bottom='auto';}
+ const reserve=parseFloat(getComputedStyle(cover.querySelector('.title-person')).bottom);
+ const available=Math.max(1,cover.clientHeight-reserve-60);
  for(const group of document.querySelectorAll('.title-cast-group')){
   const slots=[...group.querySelectorAll('.title-person')];if(!slots.length)continue;
   const frames=slots.map(e=>HisuiSpriteDisplay[e.querySelector('.portrait').dataset.sprite]);

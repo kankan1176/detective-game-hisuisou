@@ -7,6 +7,9 @@ BASE='http://127.0.0.1:4175'
 def fit(page):
  assert page.evaluate('document.documentElement.scrollHeight<=innerHeight && document.documentElement.scrollWidth<=innerWidth')
  assert page.locator('[data-action="chapters"]').inner_text()=='章を選ぶ'
+ assert page.evaluate('''()=>{const l=document.querySelector('.title-logo').getBoundingClientRect(),m=document.querySelector('.cover-buttons').getBoundingClientRect();return m.top-l.bottom>=7&&m.top-l.bottom<=25&&Math.abs(m.left+m.width/2-innerWidth/2)<1;}'''),'menu must sit directly below the title'
+ if page.locator('.title-cast-names').count():
+  assert page.locator('.title-cast-names').evaluate_all('es=>es.every(e=>getComputedStyle(e).backgroundColor==="rgba(0, 0, 0, 0)"&&parseFloat(getComputedStyle(e).borderTopWidth)===0)'),'names must not sit in a bottom panel'
 
 with sync_playwright() as p:
  b=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox'])
@@ -32,7 +35,7 @@ with sync_playwright() as p:
    assert page.evaluate('''()=>{const m=document.querySelector('.cover-buttons').getBoundingClientRect();return [...document.querySelectorAll('.title-cast-group.visible .title-person')].every(e=>{const r=e.getBoundingClientRect();return r.right<=m.left+1||r.left>=m.right-1||r.top>=m.bottom||r.bottom<=m.top;});}'''),(w,h,i,'figure obscures menu')
    assert all(page.locator('.title-cast-group.visible .title-person').evaluate_all('es=>es.map(e=>{const r=e.getBoundingClientRect(),p=e.closest(".cover-art").getBoundingClientRect();return r.x+r.width*.3>=p.x&&r.x+r.width*.7<=p.right&&r.y>=p.y+20})'))
    bottoms=page.locator('.title-cast-group.visible .portrait').evaluate_all('es=>es.map(e=>{const r=e.getBoundingClientRect(),p=e.closest(".cover-art").getBoundingClientRect(),tail=Number(getComputedStyle(e).getPropertyValue("--sprite-tail"));return r.bottom-tail*r.height-p.bottom})')
-   assert all(abs(n+52)<1 for n in bottoms)
+   assert all(abs(n+78)<1 for n in bottoms)
    assert page.evaluate('''()=>{const figures=[...document.querySelectorAll('.title-cast-group.visible .portrait')].map(e=>{const r=e.getBoundingClientRect(),f=HisuiSpriteDisplay[e.dataset.sprite];return {left:r.left+f.bounds[0]*r.width,right:r.left+f.bounds[2]*r.width,top:r.top+f.bounds[1]*r.height,bottom:r.top+f.bounds[3]*r.height}});return [...document.querySelectorAll('.title-cast-group.visible .title-name,.title-cover .badge')].filter(e=>e.getClientRects().length).every(e=>{const r=e.getBoundingClientRect();return figures.every(f=>f.bottom<=r.top||f.left>=r.right||f.right<=r.left);});}'''),(w,h,i,'title text overlaps figures')
    fit(page)
   page.emulate_media(reduced_motion='no-preference')

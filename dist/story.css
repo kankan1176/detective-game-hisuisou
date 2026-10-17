@@ -412,27 +412,27 @@ input[type=checkbox]:disabled{opacity:.5;cursor:not-allowed}
  .title-person{max-width:calc((100cqh - 64px) * .644444)}
 }
 
-/* Keep title names below the figures, with the central note outside their bodies. */
-.title-cover:not(.title-mobile) .title-person{bottom:52px}
-.title-cover:not(.title-mobile) .title-cast-names{height:52px;background:var(--charcoal);border-top:1px solid #ad977a80}
-.title-cover:not(.title-mobile) .title-name{bottom:10px}
-.title-cover:not(.title-mobile) .badge{left:50%;bottom:14px;top:auto;transform:translateX(-50%);color:#f3e5c9}
+/* Floating individual names sit above the footer note, without a bottom panel. */
+.title-cover:not(.title-mobile) .title-person{bottom:78px}
+.title-cover:not(.title-mobile) .title-cast-names{height:78px;background:none;border:0}
+.title-cover:not(.title-mobile) .title-name{bottom:34px}
+.title-cover:not(.title-mobile) .badge{left:50%;bottom:9px;top:auto;transform:translateX(-50%);color:#f3e5c9}
 /* Phone title: all 23 head portraits remain visible without a carousel. */
-.title-mobile .cover-menu{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;gap:12px;padding:14px 14px 16px;overflow:hidden}
-.title-mobile .title-logo{position:relative;inset:auto;transform:none;width:100%;max-width:none;justify-self:center;align-self:center}
+.title-mobile .cover-menu{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr);gap:12px;padding:14px 14px 16px;overflow:hidden}
+.title-mobile .title-logo{grid-row:1;position:relative;inset:auto;transform:none;width:100%;max-width:none;justify-self:center;align-self:center}
 .title-mobile .title-logo:after{display:none}
 .title-mobile .title-logo:before{font-size:115px}
 .title-mobile .title-logo .eyebrow{font-size:8px;margin-bottom:8px}
 .title-cover.title-mobile h1.series-title{font-size:clamp(21px,6.4vw,30px)}
 .title-cover.title-mobile h1.series-title small{font-size:13px;margin-top:10px}
 .title-mobile .title-roman{display:block;font-size:8px;margin-top:8px;letter-spacing:.25em}
-.title-mobile .cover-buttons{position:relative;inset:auto;transform:none;justify-self:center;width:min(270px,80%);gap:7px}
+.title-mobile .cover-buttons{grid-row:2;position:relative;inset:auto;transform:none;justify-self:center;width:min(270px,80%);gap:7px}
 .title-mobile .cover-buttons button{font-size:16px;min-height:40px;padding:7px 20px}
 .title-mobile .cover-buttons button small{display:none}
 .title-mobile .badge{display:none}
 .title-mobile .cover-art:before{background:linear-gradient(#e4d8c6e8,#e4d8c6d1 55%,#d4c2a8d9)}
 .title-mobile .cover-art:after{background:none}
-.title-ensemble{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:repeat(5,minmax(0,1fr));gap:7px 5px;min-height:0;align-self:stretch;margin:0}
+.title-ensemble{grid-row:3;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:repeat(5,minmax(0,1fr));gap:7px 5px;min-height:0;align-self:stretch;margin:0}
 .ensemble-side{display:contents}
 .ensemble-person{margin:0;min-width:0;min-height:0;height:100%;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
 .ensemble-person[data-person="20"]{grid-column:2}
@@ -453,14 +453,14 @@ input[type=checkbox]:disabled{opacity:.5;cursor:not-allowed}
  .ensemble-person figcaption{font-size:9px;line-height:11px}
 }
 @media(max-height:500px) and (max-width:1000px) and (orientation:landscape){
- .title-mobile .cover-menu{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;padding:12px 12px 14px;gap:10px 14px}
- .title-mobile .title-logo{grid-column:2;grid-row:1;align-self:center}
+ .title-mobile .cover-menu{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr);padding:12px 12px 14px;gap:10px 14px}
+ .title-mobile .title-logo{grid-column:2;grid-row:1;align-self:end}
  .title-cover.title-mobile h1.series-title{font-size:clamp(18px,2.6vw,25px)}
  .title-cover.title-mobile h1.series-title small{font-size:12px;margin-top:9px;letter-spacing:.1em}
  .title-cover.title-mobile h1.series-title small:before,.title-cover.title-mobile h1.series-title small:after{margin:0 7px}
  .title-mobile .title-roman{font-size:7px;margin-top:8px;letter-spacing:.16em}
  .title-mobile .title-logo .eyebrow{font-size:7px;letter-spacing:.18em}
- .title-mobile .cover-buttons{grid-column:2;grid-row:2;width:min(100%,230px);gap:6px}
+ .title-mobile .cover-buttons{grid-column:2;grid-row:2;align-self:start;width:min(100%,230px);gap:6px}
  .title-mobile .cover-buttons button{font-size:15px;min-height:34px;padding:6px 18px}
  .title-ensemble{display:contents}
  .ensemble-side{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));gap:8px 4px;min-height:0;grid-row:1 / 3}
