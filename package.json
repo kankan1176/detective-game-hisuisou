@@ -5,6 +5,6 @@
   "description": "シックスティーン・アンサンブル — 消えた至宝の謎",
   "scripts": {
     "start": "node preview.cjs",
-    "test": "node test.cjs && node tests/story-engine.cjs"
+    "test": "node test.cjs && node tests/story-engine.cjs && node tests/story-guide.cjs"
   }
 }

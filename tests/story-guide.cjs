@@ -1,0 +1,38 @@
+const assert=require('node:assert/strict');
+const F=require('../dist/story-engine.js'),G=require('../dist/story-guide.js');
+const s=F.initial(),context={state:s,tab:'talk',actor:5,target:6,tutorial:{actor:false,target:false}};
+const id=()=>G.next(context).id;
+assert.equal(id(),'intro');
+context.dialogue={};assert.equal(id(),'read');context.dialogue=null;s.phase='free';
+assert.equal(id(),'tutorial-actor');context.tutorial.actor=true;
+assert.equal(id(),'tutorial-target');context.tutorial.target=true;
+assert.equal(id(),'tutorial-topic');
+F.ask(s,5,6,'invite');assert.equal(id(),'tutorial-records');context.tab='records';
+assert.equal(id(),'tutorial-record');context.modal={kind:'record',id:'invite'};
+assert.equal(id(),'share');assert(!F.knows(s,7,'invite'),'guide must not share automatically');
+context.actor=7;assert.equal(id(),'share-source');context.actor=5;
+F.share(s,5,'invite');context.modal=null;assert.equal(id(),'tutorial-gather');
+F.gather(s);F.checkpoint(s);s.savedOK=false;assert.equal(id(),'retry-save');
+s.savedOK=true;assert.equal(id(),'next-chapter');assert.equal(G.phase(s).index,3);
+F.next(s);F.checkpoint(s);F.next(s);s.phase='free';context.tab='talk';
+const snapshot=JSON.stringify(s);
+for(const step of ['actor','target','topic']){
+ context.talkStep=step;const g=G.next(context);
+ assert.equal(g.id,step);
+ for(const person of F.D.people)assert(!g.text.includes(person.name),'main guide must not choose a person');
+}
+assert.equal(JSON.stringify(s),snapshot,'reading guidance must not mutate game progress');
+context.tab='records';assert.equal(id(),'record');
+const empty=F.initial();empty.stage=2;empty.phase='free';
+assert.equal(G.next({...context,state:empty}).id,'no-records');
+context.tab='board';assert.equal(id(),'talk-tab');
+s.phase='gather';assert.equal(id(),'begin-board');assert.equal(G.phase(s).index,1);
+s.phase='board';context.tab='talk';assert.equal(id(),'board-tab');context.tab='board';
+assert.equal(id(),'proof');
+const task=F.stage(s).board[0];s.board[task.id]={proof:['invite'],answer:''};assert.equal(id(),'answer');
+s.board[task.id].answer='自分で選んだ結論';assert.equal(id(),'check');
+assert(!s.solved.length,'guide must not validate evidence or solve the board');
+s.solved=[task.id];assert.equal(id(),'explain');
+context.modal={kind:'explain'};assert.equal(id(),'speaker');
+context.modal={kind:'other'};assert.equal(id(),'close');
+console.log('PASS guide: six tutorial operations, manual sharing, free person/topic choice, phase transitions, board steps, no automatic deduction or state mutation');
