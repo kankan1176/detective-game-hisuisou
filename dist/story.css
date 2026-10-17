@@ -61,9 +61,9 @@ select option{background:var(--cream);color:var(--ink)}
 .location,.scene-clock{background:var(--charcoal);color:#f3e5c9;border:3px double #b49565;padding:6px 13px;font:12px var(--serif);box-shadow:0 3px 12px #241b184d}
 .location{min-width:0;overflow-wrap:anywhere}
 .scene-clock{font-size:10px;flex-shrink:0}
-.cast-stage{position:absolute;inset:14% 0 15%;display:flex;align-items:flex-end;justify-content:center;gap:0;pointer-events:none}
+.cast-stage{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 .portrait{display:block;position:relative;width:clamp(120px,25vw,300px);aspect-ratio:1;background-size:300% 200%;background-repeat:no-repeat;filter:url(#sprite-clean);flex-shrink:0}
-.cast-stage .portrait{margin:0 -4%;width:min(45%,310px);height:auto;filter:url(#sprite-clean);animation:appear .25s ease-out}
+.cast-stage .portrait{position:absolute;margin:0;filter:url(#sprite-clean);animation:appear .25s ease-out}
 .cast-stage .portrait.dim{filter:url(#sprite-clean) brightness(.88)}
 @keyframes appear{from{opacity:.4}
 to{opacity:1}
@@ -235,7 +235,7 @@ dialog::backdrop{background:#24211fd4;backdrop-filter:blur(5px)}
 .title-cast-group.visible{opacity:1}
 .title-cast-figures{position:absolute;inset:0}
 .title-person{position:absolute;display:block;left:var(--x);bottom:0;width:var(--size);max-width:calc((100cqh - 110px) * var(--cast-scale,1));transform:translateX(-50%);z-index:var(--depth)}
-.title-person>.portrait{width:100%;max-width:none;margin:0;transform:translateY(calc(var(--sprite-tail,0) * 100%));filter:url(#sprite-clean)}
+.title-person>.portrait{position:absolute;width:100%;max-width:none;margin:0;transform:none;filter:url(#sprite-clean)}
 .title-cast-names{position:absolute;inset:auto 0 0;height:44px;z-index:8;pointer-events:none}
 .title-name{position:absolute;left:var(--name-x);bottom:12px;transform:translateX(-50%);white-space:nowrap;max-width:calc(98% / var(--cast-count));padding:5px 18px;background:#403a35;color:#f0e2cb;border:3px double #b29d7c;font:13px/1.4 var(--serif);letter-spacing:.1em;text-align:center;box-shadow:0 3px 12px #28231f59}
 

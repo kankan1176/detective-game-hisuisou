@@ -8,17 +8,18 @@ with sync_playwright() as p:
  results=[]
  for w,h in [(1366,768),(1920,911),(2560,1080),(3440,1440),(390,844),(844,390),(360,640),(320,568),(768,1024)]:
   page=b.new_page(viewport={'width':w,'height':h},reduced_motion='reduce');page.goto('http://127.0.0.1:4175');page.locator('[data-action="new"]').click();page.wait_for_timeout(300)
-  cases=page.evaluate('''()=>{let results=[];for(const p of HisuiStory.people){for(let face=0;face<(p.row===null?6:3);face++){document.querySelector('.cast-stage').innerHTML=portrait(p.id,face);fitCast();const e=document.querySelector('.cast-stage .portrait'),r=e.getBoundingClientRect(),d=document.querySelector('.dialogue').getBoundingClientRect(),t=document.querySelector('.theater').getBoundingClientRect(),tail=Number(getComputedStyle(e).getPropertyValue('--sprite-tail')),bottom=r.bottom-tail*r.height;results.push({name:p.name,face,gap:d.top-bottom,top:r.top,stageTop:t.top,filter:getComputedStyle(e).filter});}}return results;}''')
+  cases=page.evaluate('''()=>{let results=[];for(const p of HisuiStory.people){for(let face=0;face<(p.row===null?6:3);face++){document.querySelector('.cast-stage').innerHTML=portrait(p.id,face);fitCast();const e=document.querySelector('.cast-stage .portrait'),r=e.getBoundingClientRect(),d=document.querySelector('.dialogue').getBoundingClientRect(),t=document.querySelector('.theater').getBoundingClientRect(),f=HisuiSpriteDisplay[e.dataset.sprite],clip=e.parentElement.getBoundingClientRect(),bottom=Math.min(r.top+f.bounds[3]*r.height,clip.bottom);results.push({name:p.name,face,gap:d.top-bottom,top:r.top+f.bounds[1]*r.height,stageTop:t.top,filter:getComputedStyle(e).filter,ratio:r.width/r.height});}}return results;}''')
   assert len(cases)==120
   for c in cases:
    assert -16<=c['gap']<=0,(w,h,c)
    assert c['top']>=c['stageTop']+20,(w,h,c)
    assert 'sprite-clean' in c['filter'],c
+   assert abs(c['ratio']-1)<.001,(w,h,c)
   # Short and long dialogue pages must both keep the shared anchor.
   for text in ['はい。','表示の折り返しと人物の位置を確認します。'*5]:
    page.locator('#speech').evaluate('(e,text)=>e.textContent=text',text);page.evaluate('fitCast()')
    assert page.evaluate('document.documentElement.scrollHeight<=innerHeight && document.documentElement.scrollWidth<=innerWidth'), (w,h,page.evaluate('({w:innerWidth,h:innerHeight,sw:document.documentElement.scrollWidth,sh:document.documentElement.scrollHeight})'))
-   delta=page.evaluate('''()=>{const p=document.querySelector('.cast-stage .portrait'),r=p.getBoundingClientRect(),tail=Number(getComputedStyle(p).getPropertyValue('--sprite-tail'));return document.querySelector('.dialogue').getBoundingClientRect().top-(r.bottom-tail*r.height)}''')
+   delta=page.evaluate('''()=>{const p=document.querySelector('.cast-stage .portrait'),r=p.getBoundingClientRect(),f=HisuiSpriteDisplay[p.dataset.sprite];return document.querySelector('.dialogue').getBoundingClientRect().top-Math.min(r.top+f.bounds[3]*r.height,p.parentElement.getBoundingClientRect().bottom)}''')
    assert -16<=delta<=0,delta
   page.evaluate('render()');page.wait_for_timeout(300);page.screenshot(path=str(OUT/f'{w}x{h}-dialogue.png'))
   # Orientation change while still in conversation must re-anchor without advancing text.

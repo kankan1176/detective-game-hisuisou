@@ -11,7 +11,7 @@ def fit(page):
 with sync_playwright() as p:
  b=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox'])
  # Desktop: equally sized quartets, central menu, names and painted bottoms.
- for w,h in [(1366,768),(1024,768),(768,1024)]:
+ for w,h in [(1366,768),(1024,768),(768,1024),(1920,911),(2560,1080),(3440,1440)]:
   page=b.new_page(viewport={'width':w,'height':h});errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
   page.goto(BASE,wait_until='networkidle')
   assert page.locator('.title-cast-group.visible .portrait').count()==4
@@ -33,7 +33,7 @@ with sync_playwright() as p:
    assert all(page.locator('.title-cast-group.visible .title-person').evaluate_all('es=>es.map(e=>{const r=e.getBoundingClientRect(),p=e.closest(".cover-art").getBoundingClientRect();return r.x+r.width*.3>=p.x&&r.x+r.width*.7<=p.right&&r.y>=p.y+20})'))
    bottoms=page.locator('.title-cast-group.visible .portrait').evaluate_all('es=>es.map(e=>{const r=e.getBoundingClientRect(),p=e.closest(".cover-art").getBoundingClientRect(),tail=Number(getComputedStyle(e).getPropertyValue("--sprite-tail"));return r.bottom-tail*r.height-p.bottom})')
    assert all(abs(n+52)<1 for n in bottoms)
-   assert page.evaluate('''()=>{const figures=[...document.querySelectorAll('.title-cast-group.visible .portrait')].map(e=>{const r=e.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom-Number(getComputedStyle(e).getPropertyValue('--sprite-tail'))*r.height}});return [...document.querySelectorAll('.title-cast-group.visible .title-name,.title-cover .badge')].filter(e=>e.getClientRects().length).every(e=>{const r=e.getBoundingClientRect();return figures.every(f=>f.bottom<=r.top||f.left>=r.right||f.right<=r.left);});}'''),(w,h,i,'title text overlaps figures')
+   assert page.evaluate('''()=>{const figures=[...document.querySelectorAll('.title-cast-group.visible .portrait')].map(e=>{const r=e.getBoundingClientRect(),f=HisuiSpriteDisplay[e.dataset.sprite];return {left:r.left+f.bounds[0]*r.width,right:r.left+f.bounds[2]*r.width,top:r.top+f.bounds[1]*r.height,bottom:r.top+f.bounds[3]*r.height}});return [...document.querySelectorAll('.title-cast-group.visible .title-name,.title-cover .badge')].filter(e=>e.getClientRects().length).every(e=>{const r=e.getBoundingClientRect();return figures.every(f=>f.bottom<=r.top||f.left>=r.right||f.right<=r.left);});}'''),(w,h,i,'title text overlaps figures')
    fit(page)
   page.emulate_media(reduced_motion='no-preference')
   page.locator('[data-action="title-cycle"]').click();assert page.evaluate('titleTimer!==null')
