@@ -8,11 +8,15 @@ ROOT = Path(__file__).resolve().parents[1]
 people = json.loads(subprocess.check_output(
     ['node', '-p', 'JSON.stringify(require("./dist/story-data.js").people)'],
     cwd=ROOT, text=True))
+repairs = json.loads(subprocess.check_output(
+    ['node', '-p', 'global.window={};require("./dist/sprite-art.js");JSON.stringify(window.HisuiSpriteArt.replacements)'],
+    cwd=ROOT, text=True))
 crops = {}
 for person in people:
-    image = Image.open(ROOT / 'dist' / person['art']).convert('RGBA')
-    width, height = image.width // 3, image.height // 2
-    row = person['row'] or 0
+    replacement = repairs.get(f'{person["id"]}:0')
+    image = Image.open(ROOT / 'dist' / (replacement['src'] if replacement else person['art'])).convert('RGBA')
+    width, height = image.size if replacement else (image.width // 3, image.height // 2)
+    row = 0 if replacement else (person['row'] or 0)
     alpha = image.getchannel('A').crop((0, row * height, width, (row + 1) * height))
     box = alpha.point(lambda a: 255 if a >= 200 else 0).getbbox()
     top = box[1]

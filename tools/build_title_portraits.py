@@ -29,7 +29,7 @@ with sync_playwright() as p:
       .head-capture .portrait{position:absolute;width:calc(100% / var(--span));max-width:none;
         left:calc(-100% * var(--x));top:calc(-100% * var(--y));transform:none;filter:url(#sprite-clean)}
     ''')
-    page.evaluate('''async()=>{await Promise.all([...new Set(D.people.map(p=>p.art))].map(async src=>{
+    page.evaluate('''async()=>{await Promise.all([...new Set(D.people.map(p=>HisuiSpriteArt.replacements[`${p.id}:0`]?.src||p.art))].map(async src=>{
       const image=new Image();image.src=src;await image.decode();
     }));}''')
     for person_id in range(23):

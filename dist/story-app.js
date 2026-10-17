@@ -14,7 +14,22 @@ function readBook(){try{const b=JSON.parse(localStorage.getItem(SAVE_KEY)||'{"sl
 function entries(){return Object.entries(readBook().slots).flatMap(([id,v])=>{try{F.hydrate(v.state);return [{id:Number(id),...v}];}catch{return [];}});}
 function saveCheckpoint(){try{const book=readBook();book.slots[state.stage]={state:F.copy(state),savedAt:Date.now()};localStorage.setItem(SAVE_KEY,JSON.stringify(book));return true;}catch{return false;}}
 function latest(){return entries().sort((a,b)=>b.savedAt-a.savedAt)[0];}
-function portrait(id,face=0,cls=''){const p=D.people[id];if(!p)return '';const col=face%3,row=p.row===null?Math.floor(face/3):p.row,bounds=window.HisuiSpriteBounds?.[p.art]?.[row*3+col];return `<span class="portrait ${cls}" role="img" aria-label="${escape(p.name)}" style="--sprite-tail:${bounds?.tail||0};background-image:url('${p.art}');background-position:${col*50}% ${row*100}%"></span>`;}
+function portrait(id,face=0,cls=''){
+ const p=D.people[id];if(!p)return '';
+ const key=`${id}:${face}`,replacement=window.HisuiSpriteArt?.replacements[key];
+ const col=face%3,row=p.row===null?Math.floor(face/3):p.row;
+ const bounds=replacement||window.HisuiSpriteBounds?.[p.art]?.[row*3+col];
+ const rectangles=window.HisuiSpriteArt?.masks[key]||[];
+ // Mask only measured fragments from neighboring cells; keep this person's fingers and props.
+ let mask='';
+ if(rectangles.length){
+  const d='M0 0H512V512H0Z '+rectangles.map(([x,y,r,b])=>`M${x} ${y}H${r}V${b}H${x}Z`).join(' ');
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="white" fill-rule="evenodd" d="${d}"/></svg>`;
+  const url=`url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+  mask=`mask-image:${url};-webkit-mask-image:${url};mask-size:100% 100%;-webkit-mask-size:100% 100%;`;
+ }
+ return `<span class="portrait ${cls}" data-sprite="${key}" role="img" aria-label="${escape(p.name)}" style="--sprite-tail:${bounds?.tail||0};background-image:url('${replacement?.src||p.art}');background-size:${replacement?'100% 100%':'300% 200%'};background-position:${replacement?'center':`${col*50}% ${row*100}%`};${mask.replaceAll('"','&quot;')}"></span>`;
+}
 function sheetStyle(a,cols=2,rows=2){return `background-image:url('assets/story/${a.sheet}.png');background-size:${cols*100}% ${rows*100}%;background-position:${(a.cell%cols)/(cols-1)*100}% ${Math.floor(a.cell/cols)/(rows-1)*100}%`;}
 function currentScene(){return D.stages[state.stage].scenes[state.scene];}
 function cast(){return F.audience(state);}
@@ -97,7 +112,7 @@ function nextTitleGroup(){
 }
 function beginTitleCycle(){stopTitleCycle();if(!staticTitle()&&!titlePaused&&!matchMedia('(prefers-reduced-motion: reduce)').matches)titleTimer=setInterval(nextTitleGroup,6500);}
 function titleEnsembleMarkup(){
- const card=p=>`<figure class="ensemble-person" data-person="${p.id}"><span class="ensemble-face" aria-hidden="true"><img src="assets/story/ui/faces/${p.id}.png" alt="" width="192" height="192"></span><figcaption>${escape(p.name)}</figcaption></figure>`;
+ const card=p=>`<figure class="ensemble-person" data-person="${p.id}"><span class="ensemble-face" aria-hidden="true"><img src="assets/story/ui/faces/${p.id}.png${HisuiSpriteArt.replacements[`${p.id}:0`]?'?v=2-anatomy':''}" alt="" width="192" height="192"></span><figcaption>${escape(p.name)}</figcaption></figure>`;
  return `<section class="title-ensemble" aria-label="登場人物23名">${[D.people.slice(0,12),D.people.slice(12)].map(people=>`<div class="ensemble-side">${people.map(card).join('')}</div>`).join('')}</section>`;
 }
 function renderTitle(){clearInterval(endingTimer);stopTitleCycle();titleGroup=0;$('#chapter-label').textContent='';sound.music('bgm-title');const recent=latest(),mobile=staticTitle();app.innerHTML=`<section class="cover title-cover ${mobile?'title-mobile':''}"><div class="cover-art">${mobile?'':`<div class="title-cast" aria-hidden="true"><div class="title-cast-group visible" data-group="0">${titleGroupMarkup(titleGroups[0])}</div><div class="title-cast-group" data-group="1"></div></div><button class="title-cycle-control quiet" data-action="title-cycle" aria-label="人物の自動切り替えを停止または再開">${titlePaused?'自動切替を再開':matchMedia('(prefers-reduced-motion: reduce)').matches?'人物を切り替える':'切替を止める'}</button><div class="cover-caption">甘い夜に、<br>ひとつの嘘。</div>`}</div><div class="cover-menu"><div class="title-logo"><div class="eyebrow">CASE 01 · SIXTEEN ENSEMBLE</div><h1 class="series-title"><span>シックスティーン・</span><span>アンサンブル</span><small>消えた至宝の謎</small></h1><div class="title-roman">SIXTEEN ENSEMBLE</div></div>${mobile?titleEnsembleMarkup():''}<div class="cover-buttons"><button data-action="continue" class="primary" ${recent?'':'disabled'}>つづきから${recent?`<small>${escape(D.stages[recent.id].title)} 終了時</small>`:''}</button><button data-action="new">はじめから</button><button data-action="chapters">章を選ぶ</button></div><span class="badge">音声は初期OFF ・ 章の区切りで自動保存</span></div></section>`;beginTitleCycle();}

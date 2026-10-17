@@ -26,6 +26,9 @@ with sync_playwright() as p:
    assert len(ids)==4 and ids==labels
    sizes=page.locator('.title-cast-group.visible .title-person').evaluate_all('es=>es.map(e=>e.getBoundingClientRect().width)')
    assert max(sizes)-min(sizes)<1,(w,h,i,sizes)
+   assert page.locator('.title-cast-group.visible .title-person').evaluate_all('es=>es.slice(1).every((e,i)=>es[i].getBoundingClientRect().right<=e.getBoundingClientRect().left+1)'),(w,h,i,'neighboring characters overlap')
+   assert page.locator('.title-cast-group.visible .title-person').evaluate_all('es=>es.every(e=>{const r=e.getBoundingClientRect();return r.left>=-1&&r.right<=innerWidth+1})'),(w,h,i,'hands cropped at screen edge')
+   assert page.locator('.cover-buttons button').evaluate_all('es=>es.every(e=>{const b=e.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(e);return [...range.getClientRects()].every(r=>r.left>=b.left&&r.right<=b.right)})'),(w,h,i,'title button text overflow')
    assert page.evaluate('''()=>{const m=document.querySelector('.cover-buttons').getBoundingClientRect();return [...document.querySelectorAll('.title-cast-group.visible .title-person')].every(e=>{const r=e.getBoundingClientRect();return r.right<=m.left+1||r.left>=m.right-1||r.top>=m.bottom||r.bottom<=m.top;});}'''),(w,h,i,'figure obscures menu')
    assert all(page.locator('.title-cast-group.visible .title-person').evaluate_all('es=>es.map(e=>{const r=e.getBoundingClientRect(),p=e.closest(".cover-art").getBoundingClientRect();return r.x+r.width*.3>=p.x&&r.x+r.width*.7<=p.right&&r.y>=p.y+20})'))
    bottoms=page.locator('.title-cast-group.visible .portrait').evaluate_all('es=>es.map(e=>{const r=e.getBoundingClientRect(),p=e.closest(".cover-art").getBoundingClientRect(),tail=Number(getComputedStyle(e).getPropertyValue("--sprite-tail"));return r.bottom-tail*r.height-p.bottom})')
