@@ -6,7 +6,8 @@ BASE='http://127.0.0.1:4175'
 
 def fit(page):
  assert page.evaluate('document.documentElement.scrollHeight<=innerHeight && document.documentElement.scrollWidth<=innerWidth')
- assert page.locator('[data-action="chapters"]').inner_text()=='章を選ぶ'
+ assert page.locator('[data-action="chapters"]').inner_text()=='章をえらぶ'
+ assert page.locator('.cover-buttons button').evaluate_all('es=>es.map(e=>e.childNodes[0].textContent)')==['はじめから','つづきから','章をえらぶ']
  assert page.evaluate('''()=>{const l=document.querySelector('.title-logo').getBoundingClientRect(),m=document.querySelector('.cover-buttons').getBoundingClientRect();return m.top-l.bottom>=7&&m.top-l.bottom<=25&&Math.abs(m.left+m.width/2-innerWidth/2)<1;}'''),'menu must sit directly below the title'
  if page.locator('.title-cast-names').count():
   assert page.locator('.title-cast-names').evaluate_all('es=>es.every(e=>getComputedStyle(e).backgroundColor==="rgba(0, 0, 0, 0)"&&parseFloat(getComputedStyle(e).borderTopWidth)===0)'),'names must not sit in a bottom panel'
